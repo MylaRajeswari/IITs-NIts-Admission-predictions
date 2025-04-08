@@ -5,8 +5,11 @@ Joint Entrance Examination – Main (JEE-Main), formerly All India Engineering E
 In this dataset, the year-wise distribution of cutoffs for various IITs and NITs are collected and organized on the basis of stream, category, quota etc.
 
 IITs and NITs:
+
 The Indian Institutes of Technology (IITs) are the globally appreciated engineering and technological institutes in India. IITs have maintained quality education and internationally acclaimed research facilities. IIT JEE Exam is the most popular engineering admission entrance test conducted in India.
 National Institute of Technology (NITs) are premier engineering colleges in India offering admission to degree courses at both undergraduate and postgraduate level.
+
+
 Features Used:
 
 1. id – Unique identifier
