@@ -1,0 +1,1893 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+# Importing the libraries
+
+import pandas as pd
+import numpy as np 
+import matplotlib.pyplot as plt 
+import seaborn as sns
+get_ipython().run_line_magic('matplotlib', 'inline')
+
+# Ignore harmless warnings 
+
+import warnings 
+warnings.filterwarnings("ignore")
+
+# Set to display all the columns in dataset
+
+pd.set_option("display.max_columns", None)
+
+# Import psql to run queries 
+
+import pandasql as psql
+
+
+# In[2]:
+
+
+# Load the dataset information
+
+data = pd.read_excel(r"data(New).xlsx", header=0)
+
+# Copy to back-up file
+
+data_bk =data.copy()
+
+# Display first 5 records
+
+data.head()
+
+
+# In[3]:
+
+
+# Display the dataset information
+
+data.info()
+
+
+# In[4]:
+
+
+# display the unique values of the all the variables
+data.nunique()
+
+
+# In[6]:
+
+
+# display the shape of the dataset
+data.shape
+
+
+# In[7]:
+
+
+# display the duplicated values with in  dataset
+data.duplicated().any()
+
+
+# In[8]:
+
+
+# display duplicate values with in dataset
+data_dup=data[data.duplicated(keep='last')]
+# disply the duplicate records
+data_dup
+
+
+# In[9]:
+
+
+# remove the identified duplicate records
+data=data.drop_duplicates()
+
+# display the shape of the dataset
+data.shape
+
+
+# In[10]:
+
+
+# Re-setting the raw index
+data=data.reset_index(drop=True)
+# copy file to backup file after deletion of duplicate records
+data_bk2=data.copy()
+
+
+# In[11]:
+
+
+# display the duplicated  values in the dataset
+data.duplicated().any()
+
+
+# In[12]:
+
+
+# display the missing values information of variables
+data.isnull().sum()
+
+
+# In[13]:
+
+
+# display the descriptive status
+data.describe()
+
+
+# In[14]:
+
+
+# To find outliers
+first_quantile=data['id'].quantile(.25)
+third_quantile=data['id'].quantile(.75)
+IQR=third_quantile-first_quantile
+upper_bound=round(third_quantile+1.5*IQR,3)
+upper_bound
+lower_bound=round(first_quantile-1.5*IQR,3)
+lower_bound
+data[(data.id < lower_bound) | (data.id > upper_bound)]
+
+
+# In[15]:
+
+
+# To find out the  outliers
+first_quantile=data['year'].quantile(.25)
+third_quantile=data['year'].quantile(.75)
+IQR=third_quantile-first_quantile
+upper_bound=round(third_quantile+1.5*IQR,3)
+upper_bound
+lower_bound=round(first_quantile-1.5*IQR,3)
+lower_bound
+data[(data.year < lower_bound) | (data.year > upper_bound)]
+
+
+# In[16]:
+
+
+# To find outliers
+first_quantile=data['round_no'].quantile(.25)
+third_quantile=data['round_no'].quantile(.75)
+IQR=third_quantile-first_quantile
+upper_bound=round(third_quantile+1.5*IQR,3)
+upper_bound
+lower_bound=round(first_quantile-1.5*IQR,3)
+lower_bound
+data[(data.round_no < lower_bound) | (data.round_no > upper_bound)]
+
+
+# In[18]:
+
+
+# display the institute_type variables count
+data['institute_type'].value_counts() 
+
+
+# In[19]:
+
+
+# replace the 'institute_type' varaible and covert to integer value
+data['institute_type']=data['institute_type'].str.replace('IIT','1')
+data['institute_type']=data['institute_type'].str.replace('NIT','0')
+data['institute_type']=data['institute_type'].astype(int)
+
+
+# In[20]:
+
+
+# display the institute_type variables count
+data['institute_type'].value_counts() 
+
+
+# In[21]:
+
+
+# display the pool variables count
+data['pool'].value_counts()
+
+
+# In[22]:
+
+
+# replace the 'pool' varaible and covert to integer value
+data['pool']=data['pool'].str.replace('Gender-Neutral','1')
+data['pool']=data['pool'].str.replace('Female-Only','0')
+data['pool']=data['pool'].astype(int)
+
+
+# In[23]:
+
+
+# display the pool variables count
+data['pool'].value_counts()
+
+
+# In[24]:
+
+
+# display the program_duration variables count
+data['program_duration'].value_counts()
+
+
+# In[25]:
+
+
+# replace the 'program_duration' varaible and covert to integer value
+data['program_duration']=data['program_duration'].str.replace('4 Years','1')
+data['program_duration']=data['program_duration'].str.replace('5 Years','0')
+data['program_duration']=data['program_duration'].astype(int)
+
+
+# In[26]:
+
+
+# display the program_duration variables count
+data['program_duration'].value_counts()
+
+
+# In[27]:
+
+
+# display the quota  variables count
+data['quota'].value_counts()
+
+
+# In[29]:
+
+
+#  use the labelEncoder to handle categorical data
+from sklearn.preprocessing import LabelEncoder
+LE= LabelEncoder()
+data['quota']=LE.fit_transform(data[['quota']])
+
+
+# In[30]:
+
+
+# display the institute_short  variables count
+data['institute_short'].value_counts()
+
+
+# In[31]:
+
+
+#  use the labelEncoder to handle categorical data
+from sklearn.preprocessing import LabelEncoder
+LE= LabelEncoder()
+data['institute_short']=LE.fit_transform(data[['institute_short']])
+
+
+# In[32]:
+
+
+# display the program_name variables count
+data['program_name'].value_counts()
+
+
+# In[33]:
+
+
+#  use the labelEncoder to handle categorical data
+from sklearn.preprocessing import LabelEncoder
+LE= LabelEncoder()
+data['program_name']=LE.fit_transform(data[['program_name']])
+
+
+# In[34]:
+
+
+# display the degree_short variables count
+data['degree_short'].value_counts()
+
+
+# In[35]:
+
+
+#  use the labelEncoder to handle categorical data
+from sklearn.preprocessing import LabelEncoder
+LE= LabelEncoder()
+data['degree_short']=LE.fit_transform(data[['degree_short']])
+
+
+# In[36]:
+
+
+# display the category variables count
+data['category'].value_counts()
+
+
+# In[37]:
+
+
+#  use the labelEncoder to handle categorical data
+from sklearn.preprocessing import LabelEncoder
+LE= LabelEncoder()
+data['category']=LE.fit_transform(data[['category']])
+
+
+# In[38]:
+
+
+# Display the dataset information
+
+data.info()
+
+
+# In[39]:
+
+
+# display the sample sataset
+data.sample(5)
+
+
+# In[40]:
+
+
+# Count the target or dependent variable by '0' & '1' and their proportion 
+# (>= 10 : 1, then the dataset is imbalance data)
+
+is_preparatory_count = data.is_preparatory.value_counts()
+print('Class 0:', is_preparatory_count[0])
+print('Class 1:', is_preparatory_count[1])
+print('Proportion:', round(is_preparatory_count[0] / is_preparatory_count[1], 2), ': 1')
+print('Total IIT-NIT Data records:', len(data))
+
+
+# In[41]:
+
+
+# Identify the independent and target (dependent) variables
+
+Indepvar=[]
+for col in data.columns:
+    if col != 'is_preparatory':
+        Indepvar.append(col)
+        
+TargetVar='is_preparatory'
+
+x=data[Indepvar]
+
+y=data[TargetVar]
+
+
+# In[42]:
+
+
+# Random oversampling can be implemented using the RandomOverSampler class
+
+from imblearn.over_sampling import RandomOverSampler
+
+oversample = RandomOverSampler(sampling_strategy=0.125)
+
+x_over, y_over = oversample.fit_resample(x, y)
+
+print(x_over.shape)
+print(y_over.shape)
+
+
+# In[43]:
+
+
+# Random oversampling can be implemented using the RandomOverSampler class
+
+from imblearn.over_sampling import RandomOverSampler
+
+oversample = RandomOverSampler(sampling_strategy=0.125)
+
+x_over, y_over = oversample.fit_resample(x, y)
+
+print(x_over.shape)
+print(y_over.shape)
+
+
+# In[44]:
+
+
+# split the data into train and test (random sampling)
+
+#70% data train and 30% data test
+
+from sklearn.model_selection import train_test_split
+
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.3,random_state=42)
+
+# display yhe shape for train and test data
+
+x_train.shape,x_test.shape,y_train.shape,y_test.shape
+
+
+# In[45]:
+
+
+# Scaling the features by using MinMaxScaler
+
+from sklearn.preprocessing import MinMaxScaler
+
+mmscaler = MinMaxScaler(feature_range=(0, 1))
+
+x_train= mmscaler.fit_transform(x_train)
+x_train = pd.DataFrame(x_train)
+
+x_test = mmscaler.fit_transform(x_test)
+x_test = pd.DataFrame(x_test)
+
+
+# # Logestic Regression Algorithm(Classifier)
+
+# In[46]:
+
+
+# To build the 'Logistic Regression' model with random sampling 
+from sklearn.linear_model import LogisticRegression
+# create an object for model
+ModelLR= LogisticRegression()
+# train the model
+ModelLR.fit(x_train,y_train)
+# predict themodel with test the dataset
+y_pred=ModelLR.predict(x_test)
+y_pred_prob=ModelLR.predict_proba(x_test)
+
+
+# In[47]:
+
+
+#To display the algorithm paramaters
+params=ModelLR.get_params()
+print(params)
+
+
+# In[48]:
+
+
+# Confusion matrix in sklearn
+
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+
+# Actual values
+
+actual = y_test
+
+# Predicted values
+
+predicted = y_pred
+
+# Confusion matrix
+
+matrix = confusion_matrix(actual,predicted, labels=[1,0], sample_weight=None, normalize=None)
+print('Confusion matrix : \n', matrix)
+
+# Outcome values order in sklearn
+
+tp, fn, fp, tn = confusion_matrix(actual,predicted,labels=[1,0]).reshape(-1)
+print('Outcome values : \n', tp, fn, fp, tn)
+
+# Classification report for precision, recall f1-score and accuracy
+
+C_Report = classification_report(actual,predicted,labels=[1,0])
+
+print('Classification report : \n', C_Report)
+
+# Calculating the metrics
+
+sensitivity = round(tp/(tp+fn), 3);
+specificity = round(tn/(tn+fp), 3);
+accuracy = round((tp+tn)/(tp+fp+tn+fn), 3);
+balanced_accuracy = round((sensitivity+specificity)/2, 3);
+    
+precision = round(tp/(tp+fp), 3);
+f1Score = round((2*tp/(2*tp + fp + fn)), 3);
+
+# Matthews Correlation Coefficient (MCC). Range of values of MCC lie between -1 to +1. 
+# A model with a score of +1 is a perfect model and -1 is a poor model
+
+from math import sqrt
+
+mx = (tp+fp) * (tp+fn) * (tn+fp) * (tn+fn)
+MCC = round(((tp * tn) - (fp * fn)) / sqrt(mx), 3)
+
+print('Accuracy :', round(accuracy*100, 2),'%')
+print('Precision :', round(precision*100, 2),'%')
+print('Recall :', round(sensitivity*100,2), '%')
+print('F1 Score :', f1Score)
+print('Specificity or True Negative Rate :', round(specificity*100,2), '%')
+print('Balanced Accuracy :', round(balanced_accuracy*100, 2),'%')
+print('MCC :', MCC)
+# Area under ROC curve 
+
+from sklearn.metrics import roc_curve, roc_auc_score
+
+print('roc_auc_score:', round(roc_auc_score(actual, predicted), 3))
+
+# ROC Curve
+
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
+model_roc_auc = roc_auc_score(actual, predicted)
+fpr, tpr, thresholds = roc_curve(actual, ModelLR.predict_proba(x_test)[:,1])
+plt.figure()
+#----------------------------------------------------
+plt.plot(fpr, tpr, label= 'Classification Model' % model_roc_auc)
+plt.plot([0, 1], [0, 1],'r--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic')
+plt.legend(loc="lower right")
+plt.show() 
+print('-----------------------------------------------------------------------------------------------------')
+
+
+# # Decision Tree Algorithm(Classifier)
+
+# In[49]:
+
+
+# To build the 'Decision tree algorithm' model with random sampling 
+from sklearn.tree import DecisionTreeClassifier
+# create an object for model
+ModelDT=DecisionTreeClassifier()
+# train the model
+ModelDT.fit(x_train,y_train)
+# predict themodel with test the dataset
+y_pred=ModelDT.predict(x_test)
+y_pred_prob=ModelDT.predict_proba(x_test)
+
+
+# In[50]:
+
+
+#To display the algorithm paramaters
+params=ModelDT.get_params()
+print(params)
+
+
+# In[51]:
+
+
+# Confusion matrix in sklearn
+
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+
+# Actual values
+
+actual = y_test
+
+# Predicted values
+
+predicted = y_pred
+
+# Confusion matrix
+
+matrix = confusion_matrix(actual,predicted, labels=[1,0], sample_weight=None, normalize=None)
+print('Confusion matrix : \n', matrix)
+
+# Outcome values order in sklearn
+
+tp, fn, fp, tn = confusion_matrix(actual,predicted,labels=[1,0]).reshape(-1)
+print('Outcome values : \n', tp, fn, fp, tn)
+
+# Classification report for precision, recall f1-score and accuracy
+
+C_Report = classification_report(actual,predicted,labels=[1,0])
+
+print('Classification report : \n', C_Report)
+
+# Calculating the metrics
+
+sensitivity = round(tp/(tp+fn), 3);
+specificity = round(tn/(tn+fp), 3);
+accuracy = round((tp+tn)/(tp+fp+tn+fn), 3);
+balanced_accuracy = round((sensitivity+specificity)/2, 3);
+    
+precision = round(tp/(tp+fp), 3);
+f1Score = round((2*tp/(2*tp + fp + fn)), 3);
+
+# Matthews Correlation Coefficient (MCC). Range of values of MCC lie between -1 to +1. 
+# A model with a score of +1 is a perfect model and -1 is a poor model
+
+from math import sqrt
+
+mx = (tp+fp) * (tp+fn) * (tn+fp) * (tn+fn)
+MCC = round(((tp * tn) - (fp * fn)) / sqrt(mx), 3)
+
+print('Accuracy :', round(accuracy*100, 2),'%')
+print('Precision :', round(precision*100, 2),'%')
+print('Recall :', round(sensitivity*100,2), '%')
+print('F1 Score :', f1Score)
+print('Specificity or True Negative Rate :', round(specificity*100,2), '%')
+print('Balanced Accuracy :', round(balanced_accuracy*100, 2),'%')
+print('MCC :', MCC)
+# Area under ROC curve 
+
+from sklearn.metrics import roc_curve, roc_auc_score
+
+print('roc_auc_score:', round(roc_auc_score(actual, predicted), 3))
+
+# ROC Curve
+
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
+model_roc_auc = roc_auc_score(actual, predicted)
+fpr, tpr, thresholds = roc_curve(actual, ModelDT.predict_proba(x_test)[:,1])
+plt.figure()
+#----------------------------------------------------
+plt.plot(fpr, tpr, label= 'Classification Model' % model_roc_auc)
+plt.plot([0, 1], [0, 1],'r--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic')
+plt.legend(loc="lower right")
+plt.show() 
+print('-----------------------------------------------------------------------------------------------------')
+
+
+# In[52]:
+
+
+# plot the decision tree
+
+import matplotlib.pyplot as plt
+from sklearn import tree
+
+plt.figure(figsize=(20,5))
+tree.plot_tree(ModelDT);
+
+
+# # Random Forest Algorithm(Classifier)
+
+# In[53]:
+
+
+# To build the 'Random forest algorithm' model with random sampling 
+from sklearn.ensemble import RandomForestClassifier
+# create an object for model
+ModelRF= RandomForestClassifier()
+# train the model
+ModelRF.fit(x_train,y_train)
+# predict themodel with test the dataset
+y_pred=ModelRF.predict(x_test)
+y_pred_prob=ModelRF.predict_proba(x_test)
+
+
+# In[54]:
+
+
+#To display the algorithm paramaters
+params=ModelRF.get_params()
+print(params)
+
+
+# In[55]:
+
+
+# Confusion matrix in sklearn
+
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+
+# Actual values
+
+actual = y_test
+
+# Predicted values
+
+predicted = y_pred
+
+# Confusion matrix
+
+matrix = confusion_matrix(actual,predicted, labels=[1,0], sample_weight=None, normalize=None)
+print('Confusion matrix : \n', matrix)
+
+# Outcome values order in sklearn
+
+tp, fn, fp, tn = confusion_matrix(actual,predicted,labels=[1,0]).reshape(-1)
+print('Outcome values : \n', tp, fn, fp, tn)
+
+# Classification report for precision, recall f1-score and accuracy
+
+C_Report = classification_report(actual,predicted,labels=[1,0])
+
+print('Classification report : \n', C_Report)
+
+# Calculating the metrics
+
+sensitivity = round(tp/(tp+fn), 3);
+specificity = round(tn/(tn+fp), 3);
+accuracy = round((tp+tn)/(tp+fp+tn+fn), 3);
+balanced_accuracy = round((sensitivity+specificity)/2, 3);
+    
+precision = round(tp/(tp+fp), 3);
+f1Score = round((2*tp/(2*tp + fp + fn)), 3);
+
+# Matthews Correlation Coefficient (MCC). Range of values of MCC lie between -1 to +1. 
+# A model with a score of +1 is a perfect model and -1 is a poor model
+
+from math import sqrt
+
+mx = (tp+fp) * (tp+fn) * (tn+fp) * (tn+fn)
+MCC = round(((tp * tn) - (fp * fn)) / sqrt(mx), 3)
+
+print('Accuracy :', round(accuracy*100, 2),'%')
+print('Precision :', round(precision*100, 2),'%')
+print('Recall :', round(sensitivity*100,2), '%')
+print('F1 Score :', f1Score)
+print('Specificity or True Negative Rate :', round(specificity*100,2), '%')
+print('Balanced Accuracy :', round(balanced_accuracy*100, 2),'%')
+print('MCC :', MCC)
+# Area under ROC curve 
+
+from sklearn.metrics import roc_curve, roc_auc_score
+
+print('roc_auc_score:', round(roc_auc_score(actual, predicted), 3))
+
+# ROC Curve
+
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
+model_roc_auc = roc_auc_score(actual, predicted)
+fpr, tpr, thresholds = roc_curve(actual, ModelRF.predict_proba(x_test)[:,1])
+plt.figure()
+#----------------------------------------------------
+plt.plot(fpr, tpr, label= 'Classification Model' % model_roc_auc)
+plt.plot([0, 1], [0, 1],'r--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic')
+plt.legend(loc="lower right")
+plt.show() 
+print('-----------------------------------------------------------------------------------------------------')
+
+
+# # Extra Tree Algorithm(Classifier)
+
+# In[56]:
+
+
+
+# To build the 'Random Forest' model with random sampling
+
+from sklearn.ensemble import ExtraTreesClassifier
+
+# Create an object for Extra Trees Classifier 
+
+ModelET = ExtraTreesClassifier()
+
+# Train the model with train data 
+
+ModelET.fit(x_train,y_train)
+
+# Predict the model with test data set
+
+y_pred = ModelET.predict(x_test)
+y_pred_prob = ModelET.predict_proba(x_test)
+
+# Confusion matrix in sklearn
+
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+
+# actual values
+
+actual = y_test
+
+# predicted values
+
+predicted = y_pred
+
+# confusion matrix
+
+matrix = confusion_matrix(actual, predicted, labels=[1,0],sample_weight=None, normalize=None)
+print('Confusion matrix : \n', matrix)
+
+# outcome values order in sklearn
+
+tp, fn, fp, tn = confusion_matrix(actual, predicted, labels=[1,0]).reshape(-1)
+print('Outcome values : \n', tp, fn, fp, tn)
+
+# classification report for precision, recall f1-score and accuracy
+
+C_Report = classification_report(actual, predicted, labels=[1,0])
+
+print('Classification report : \n', C_Report)
+
+# calculating the metrics
+
+sensitivity = round(tp/(tp+fn), 3);
+specificity = round(tn/(tn+fp), 3);
+accuracy = round((tp+tn)/(tp+fp+tn+fn), 3);
+balanced_accuracy = round((sensitivity+specificity)/2, 3);
+precision = round(tp/(tp+fp), 3);
+f1Score = round((2*tp/(2*tp + fp + fn)), 3);
+
+# Matthews Correlation Coefficient (MCC). Range of values of MCC lie between -1 to +1. 
+# A model with a score of +1 is a perfect model and -1 is a poor model
+
+from math import sqrt
+
+mx = (tp+fp) * (tp+fn) * (tn+fp) * (tn+fn)
+MCC = round(((tp * tn) - (fp * fn)) / sqrt(mx), 3)
+
+print('Accuracy :', round(accuracy*100, 2),'%')
+print('Precision :', round(precision*100, 2),'%')
+print('Recall :', round(sensitivity*100,2), '%')
+print('F1 Score :', f1Score)
+print('Specificity or True Negative Rate :', round(specificity*100,2), '%'  )
+print('Balanced Accuracy :', round(balanced_accuracy*100, 2),'%')
+print('MCC :', MCC)
+
+# Area under ROC curve 
+
+from sklearn.metrics import roc_curve, roc_auc_score
+
+print('roc_auc_score:', round(roc_auc_score(actual, predicted), 3))
+
+# ROC Curve
+
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
+model_roc_auc = roc_auc_score(actual, predicted)
+fpr, tpr, thresholds = roc_curve(actual, ModelET.predict_proba(x_test)[:,1])
+plt.figure()
+#--------------------------------------------------------------------
+plt.plot(fpr, tpr, label= 'Classification Model' % model_roc_auc)
+plt.plot([0, 1], [0, 1],'r--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic')
+plt.legend(loc="lower right")
+plt.savefig('Log_ROC')
+plt.show() 
+print('-----------------------------------------------------------------------------------------------------')
+
+
+# In[57]:
+
+
+# display the all the variables
+data.columns
+
+
+# In[58]:
+
+
+# Create a list for plotting the decision trees
+
+figcols = ['id', 'year', 'institute_type', 'round_no', 'quota', 'pool',
+       'institute_short', 'program_name', 'program_duration', 'degree_short',
+       'category', 'opening_rank', 'closing_rank', 'is_preparatory']
+
+
+# In[59]:
+
+
+# Visualize individual trees and code below visualizes the first decision tree of Extra Trees Classifier
+
+from sklearn import tree
+
+fn1=figcols
+cn1=['0', '1']
+
+fig, axes = plt.subplots(nrows = 1, ncols = 1, figsize = (4,4), dpi=800)
+tree.plot_tree(ModelET.estimators_[0],
+               feature_names = fn1, 
+               class_names=cn1,
+               filled = True);
+#fig.savefig('ModelET.png')
+
+
+# In[60]:
+
+
+# Visualize individual trees and code below visualizes the first 5 decision trees of Extra Trees Classifier
+
+from sklearn import tree
+
+fn2=figcols
+cn2=['0', '1']
+
+fig, axes = plt.subplots(nrows = 1, ncols = 5, figsize = (10,2), dpi=3000)
+for index in range(0, 5):
+    tree.plot_tree(ModelET.estimators_[index],
+                   feature_names = fn2, 
+                   class_names=cn2,
+                   filled = True,
+                   ax = axes[index]);
+    
+    axes[index].set_title('Estimator: ' + str(index), fontsize = 11)
+#fig.savefig('ModelET1.png')
+
+
+# # KNN Algorithm
+
+# In[61]:
+
+
+# load the KNNResults
+KNNResults = pd.read_excel(r"KNN_ResultsNew.xlsx", header=0)
+KNNResults.head()
+
+
+# In[62]:
+
+
+
+# Build KNN Model
+
+from sklearn.neighbors import KNeighborsClassifier
+
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+
+import sklearn.metrics as metrics
+
+from sklearn.metrics import roc_curve, roc_auc_score
+
+accuracy = []
+
+for a in range(1, 21, 1):
+    
+    k = a
+    
+    # Build the model
+    
+    ModelKNN = KNeighborsClassifier(n_neighbors=k)
+    
+    # Train the model
+    
+    ModelKNN.fit(x_train, y_train)
+    
+    # Predict the model
+    
+    y_pred = ModelKNN.predict(x_test)
+    y_pred_prob = ModelKNN.predict_proba(x_test)
+    
+    print('KNN_K_value = ', a)
+    
+    # Print the model name
+    
+    print('Model Name: ', ModelKNN)
+    
+    # confusion matrix in sklearn
+    
+    from sklearn.metrics import confusion_matrix
+    from sklearn.metrics import classification_report
+    
+    # actual values
+    
+    actual = y_test
+    
+    # predicted values
+    
+    predicted = y_pred
+    
+    # confusion matrix
+    
+    matrix = confusion_matrix(actual,predicted, labels=[1,0],sample_weight=None, normalize=None)
+    print('Confusion matrix : \n', matrix)
+    
+    # outcome values order in sklearn
+    
+    tp, fn, fp, tn = confusion_matrix(actual,predicted,labels=[1,0]).reshape(-1)
+    print('Outcome values : \n', tp, fn, fp, tn)
+    
+    # classification report for precision, recall f1-score and accuracy
+    
+    C_Report = classification_report(actual,predicted,labels=[1,0])
+    
+    print('Classification report : \n', C_Report)
+    
+    # calculating the metrics
+    
+    sensitivity = round(tp/(tp+fn), 3);
+    specificity = round(tn/(tn+fp), 3);
+    accuracy = round((tp+tn)/(tp+fp+tn+fn), 3);
+    balanced_accuracy = round((sensitivity+specificity)/2, 3);
+    
+    precision = round(tp/(tp+fp), 3);
+    f1Score = round((2*tp/(2*tp + fp + fn)), 3);
+    
+    # Matthews Correlation Coefficient (MCC). Range of values of MCC lie between -1 to +1. 
+    # A model with a score of +1 is a perfect model and -1 is a poor model
+    
+    from math import sqrt
+    
+    mx = (tp+fp) * (tp+fn) * (tn+fp) * (tn+fn)
+    MCC = round(((tp * tn) - (fp * fn)) / sqrt(mx), 3)
+    
+    print('Accuracy :', round(accuracy*100, 2),'%')
+    print('Precision :', round(precision*100, 2),'%')
+    print('Recall :', round(sensitivity*100,2), '%')
+    print('F1 Score :', f1Score)
+    print('Specificity or True Negative Rate :', round(specificity*100,2), '%'  )
+    print('Balanced Accuracy :', round(balanced_accuracy*100, 2),'%')
+    print('MCC :', MCC)
+    
+    # Area under ROC curve 
+    
+    from sklearn.metrics import roc_curve, roc_auc_score
+    
+    print('roc_auc_score:', round(roc_auc_score(actual, predicted), 3))
+    
+    # ROC Curve
+    
+    from sklearn.metrics import roc_auc_score
+    from sklearn.metrics import roc_curve
+    model_roc_auc = roc_auc_score(actual, predicted)
+    fpr, tpr, thresholds = roc_curve(actual, ModelKNN.predict_proba(x_test)[:,1])
+    plt.figure()
+    # plt.plot(fpr, tpr, label='Logistic Regression (area = %0.2f)' % logit_roc_auc)
+    plt.plot(fpr, tpr, label= 'Classification Model' % model_roc_auc)
+    plt.plot([0, 1], [0, 1],'r--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic')
+    plt.legend(loc="lower right")
+    #plt.savefig('Log_ROC')
+    plt.show()
+    #------------------------------------------------------------------------------
+    new_row = {'Model Name' : ModelKNN,
+               'KNN K Value' : a,
+               'True_Positive' : tp,
+               'False_Negative' : fn,
+               'False_Positive' : fp,
+               'True_Negative' : tn,
+               'Accuracy' : accuracy,
+               'Precision' : precision,
+               'Recall' : sensitivity,
+               'F1 Score' : f1Score,
+               'Specificity' : specificity,
+               'MCC':MCC,
+               'ROC_AUC_Score':roc_auc_score(actual, predicted),
+               'Balanced Accuracy':balanced_accuracy}
+    KNNResults = KNNResults.append(new_row, ignore_index=True)
+    #------KNN_Results------------------------------------------------------------------------
+
+
+# In[63]:
+
+
+# display the KNNResults
+KNNResults
+
+
+# # Naive Bayes Model(Guassianb)Algorithm
+
+# In[64]:
+
+
+# Training the Naive Bayes model (GaussianNB) on the Training set
+
+from sklearn.naive_bayes import GaussianNB
+
+modelGNB = GaussianNB(priors=None, var_smoothing=1e-09)
+
+# Fit the model with train data
+
+modelGNB.fit(x_train,y_train)
+
+# Predict the model with test data set
+
+y_pred = modelGNB.predict(x_test)
+y_pred_prob = modelGNB.predict_proba(x_test)
+
+# Confusion matrix in sklearn
+
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+
+# actual values
+
+actual = y_test
+
+# predicted values
+
+predicted = y_pred
+
+# confusion matrix
+
+matrix = confusion_matrix(actual,predicted, labels=[1,0],sample_weight=None, normalize=None)
+print('Confusion matrix : \n', matrix)
+
+# outcome values order in sklearn
+
+tp, fn, fp, tn = confusion_matrix(actual,predicted,labels=[1,0]).reshape(-1)
+print('Outcome values : \n', tp, fn, fp, tn)
+
+# classification report for precision, recall f1-score and accuracy
+
+C_Report = classification_report(actual,predicted,labels=[1,0])
+
+print('Classification report : \n', C_Report)
+
+# calculating the metrics
+
+sensitivity = round(tp/(tp+fn), 3);
+specificity = round(tn/(tn+fp), 3);
+accuracy = round((tp+tn)/(tp+fp+tn+fn), 3);
+balanced_accuracy = round((sensitivity+specificity)/2, 3);
+precision = round(tp/(tp+fp), 3);
+f1Score = round((2*tp/(2*tp + fp + fn)), 3);
+
+# Matthews Correlation Coefficient (MCC). Range of values of MCC lie between -1 to +1. 
+# A model with a score of +1 is a perfect model and -1 is a poor model
+
+from math import sqrt
+
+mx = (tp+fp) * (tp+fn) * (tn+fp) * (tn+fn)
+MCC = round(((tp * tn) - (fp * fn)) / sqrt(mx), 3)
+
+print('Accuracy :', round(accuracy*100, 2),'%')
+print('Precision :', round(precision*100, 2),'%')
+print('Recall :', round(sensitivity*100,2), '%')
+print('F1 Score :', f1Score)
+print('Specificity or True Negative Rate :', round(specificity*100,2), '%'  )
+print('Balanced Accuracy :', round(balanced_accuracy*100, 2),'%')
+print('MCC :', MCC)
+
+# Area under ROC curve 
+
+from sklearn.metrics import roc_curve, roc_auc_score
+
+print('roc_auc_score:', round(roc_auc_score(actual, predicted), 3))
+
+# ROC Curve
+
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
+model_roc_auc = roc_auc_score(actual, predicted)
+fpr, tpr, thresholds = roc_curve(actual,modelGNB.predict_proba(x_test)[:,1])
+plt.figure()
+# plt.plot(fpr, tpr, label='Logistic Regression (area = %0.2f)' % logit_roc_auc)
+plt.plot(fpr, tpr, label= 'Classification Model' % model_roc_auc)
+plt.plot([0, 1], [0, 1],'r--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic')
+plt.legend(loc="lower right")
+plt.savefig('Log_ROC')
+plt.show() 
+print('-----------------------------------------------------------------------------------------------------')
+
+
+# # Support Vector Machines_Linear Kernal (SVM)
+
+# In[65]:
+
+
+# Load the results file for  SVM
+
+EMResults1 = pd.read_excel(r"EMResultsNew.xlsx", header=0)
+
+# Display the first 5 records
+
+EMResults1.head()
+
+
+# In[66]:
+
+
+# Training the SVM algorithm with train dataset
+
+from sklearn.svm import SVC
+
+ModelSVM1 = SVC(C=1.0, kernel='linear', degree=3, gamma='scale', coef0=0.0, shrinking=True, 
+                probability=True, tol=0.001, cache_size=200, class_weight=None, verbose=False, 
+                max_iter=- 1, decision_function_shape='ovr', break_ties=False, random_state=None)
+
+# Train the model with train data 
+
+ModelSVM1 = ModelSVM1.fit(x_train, y_train)
+
+# Predict the model with test data set
+
+y_pred = ModelSVM1.predict(x_test)
+y_pred_prob = ModelSVM1.predict_proba(x_test)
+
+# Print the model name
+    
+print('Model Name: ', "SVM - Linear")
+
+# Confusion matrix in sklearn
+
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+
+# actual values
+
+actual = y_test
+
+# predicted values
+
+predicted = y_pred
+
+# confusion matrix
+
+matrix = confusion_matrix(actual,predicted, labels=[1,0],sample_weight=None, normalize=None)
+print('Confusion matrix : \n', matrix)
+
+# outcome values order in sklearn
+
+tp, fn, fp, tn = confusion_matrix(actual,predicted,labels=[1,0]).reshape(-1)
+print('Outcome values : \n', tp, fn, fp, tn)
+
+# classification report for precision, recall f1-score and accuracy
+
+C_Report = classification_report(actual,predicted,labels=[1,0])
+
+print('Classification report : \n', C_Report)
+
+# calculating the metrics
+
+sensitivity = round(tp/(tp+fn), 3);
+specificity = round(tn/(tn+fp), 3);
+accuracy = round((tp+tn)/(tp+fp+tn+fn), 3);
+balanced_accuracy = round((sensitivity+specificity)/2, 3);
+precision = round(tp/(tp+fp), 3);
+f1Score = round((2*tp/(2*tp + fp + fn)), 3);
+
+# Matthews Correlation Coefficient (MCC). Range of values of MCC lie between -1 to +1. 
+# A model with a score of +1 is a perfect model and -1 is a poor model
+
+from math import sqrt
+
+mx = (tp+fp) * (tp+fn) * (tn+fp) * (tn+fn)
+MCC = round(((tp * tn) - (fp * fn)) / sqrt(mx), 3)
+
+print('Accuracy :', round(accuracy*100, 2),'%')
+print('Precision :', round(precision*100, 2),'%')
+print('Recall :', round(sensitivity*100,2), '%')
+print('F1 Score :', f1Score)
+print('Specificity or True Negative Rate :', round(specificity*100,2), '%'  )
+print('Balanced Accuracy :', round(balanced_accuracy*100, 2),'%')
+print('MCC :', MCC)
+
+# Area under ROC curve 
+
+from sklearn.metrics import roc_curve, roc_auc_score
+
+print('roc_auc_score:', round(roc_auc_score(actual, predicted), 3))
+
+# ROC Curve
+
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
+model_roc_auc = roc_auc_score(actual, predicted)
+fpr, tpr, thresholds = roc_curve(actual,ModelSVM1.predict_proba(x_test)[:,1])
+plt.figure()
+# plt.plot(fpr, tpr, label='Logistic Regression (area = %0.2f)' % logit_roc_auc)
+plt.plot(fpr, tpr, label= 'Classification Model' % model_roc_auc)
+plt.plot([0, 1], [0, 1],'r--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic')
+plt.legend(loc="lower right")
+plt.savefig('Log_ROC')
+plt.show() 
+print('-----------------------------------------------------------------------------------------------------')
+#---
+new_row = {'Model Name' : "SVM - Linear",
+            'True_Positive' : tp, 
+            'False_Negative' : fn, 
+            'False_Positive' : fp,
+            'True_Negative' : tn,
+            'Accuracy' : accuracy,
+            'Precision' : precision,
+            'Recall' : sensitivity,
+            'F1 Score' : f1Score,
+            'Specificity' : specificity,
+            'MCC':MCC,
+            'ROC_AUC_Score':roc_auc_score(actual, predicted),
+            'Balanced Accuracy':balanced_accuracy}
+EMResults1 = EMResults1.append(new_row, ignore_index=True)
+#-------------------------------------------------------------------------------------------------------------
+
+
+# In[67]:
+
+
+# display the EMResults
+EMResults1.head()
+
+
+# # SVM_Polinomial Kernal
+
+# In[68]:
+
+
+# Training the SVM algorithm
+
+from sklearn.svm import SVC
+
+ModelSVMPoly = SVC(kernel='poly', degree=2, probability=True)
+
+# Train the model
+
+ModelSVMPoly.fit(x_train, y_train)
+
+# Predict the model with test data set
+
+y_pred = ModelSVMPoly.predict(x_test)
+y_pred_prob = ModelSVMPoly.predict_proba(x_test)
+
+# Print the model name
+    
+print('Model Name: ', "SVM - Polynominal")
+
+# Confusion matrix in sklearn
+
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+
+# actual values
+
+actual = y_test
+
+# predicted values
+
+predicted = y_pred
+
+# confusion matrix
+
+matrix = confusion_matrix(actual,predicted, labels=[1,0],sample_weight=None, normalize=None)
+print('Confusion matrix : \n', matrix)
+
+# outcome values order in sklearn
+
+tp, fn, fp, tn = confusion_matrix(actual,predicted,labels=[1,0]).reshape(-1)
+print('Outcome values : \n', tp, fn, fp, tn)
+
+# classification report for precision, recall f1-score and accuracy
+
+C_Report = classification_report(actual,predicted,labels=[1,0])
+
+print('Classification report : \n', C_Report)
+
+# calculating the metrics
+
+sensitivity = round(tp/(tp+fn), 3);
+specificity = round(tn/(tn+fp), 3);
+accuracy = round((tp+tn)/(tp+fp+tn+fn), 3);
+balanced_accuracy = round((sensitivity+specificity)/2, 3);
+precision = round(tp/(tp+fp), 3);
+f1Score = round((2*tp/(2*tp + fp + fn)), 3);
+
+# Matthews Correlation Coefficient (MCC). Range of values of MCC lie between -1 to +1. 
+# A model with a score of +1 is a perfect model and -1 is a poor model
+
+from math import sqrt
+
+mx = (tp+fp) * (tp+fn) * (tn+fp) * (tn+fn)
+MCC = round(((tp * tn) - (fp * fn)) / sqrt(mx), 3)
+
+print('Accuracy :', round(accuracy*100, 2),'%')
+print('Precision :', round(precision*100, 2),'%')
+print('Recall :', round(sensitivity*100,2), '%')
+print('F1 Score :', f1Score)
+print('Specificity or True Negative Rate :', round(specificity*100,2), '%'  )
+print('Balanced Accuracy :', round(balanced_accuracy*100, 2),'%')
+print('MCC :', MCC)
+
+# Area under ROC curve 
+
+from sklearn.metrics import roc_curve, roc_auc_score
+
+print('roc_auc_score:', round(roc_auc_score(y_test, y_pred), 3))
+
+# ROC Curve
+
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
+logit_roc_auc = roc_auc_score(y_test, y_pred)
+fpr, tpr, thresholds = roc_curve(y_test,ModelSVMPoly.predict_proba(x_test)[:,1])
+plt.figure()
+# plt.plot
+plt.plot(fpr, tpr, label= 'Classification Model' % logit_roc_auc)
+plt.plot([0, 1], [0, 1],'r--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic')
+plt.legend(loc="lower right")
+plt.savefig('Log_ROC')
+plt.show() 
+print('-----------------------------------------------------------------------------------------------------')
+#---
+new_row = {'Model Name' : "SVM - Polynominal",
+            'True_Positive' : tp, 
+            'False_Negative' : fn, 
+            'False_Positive' : fp,
+            'True_Negative' : tn,
+            'Accuracy' : accuracy,
+            'Precision' : precision,
+            'Recall' : sensitivity,
+            'F1 Score' : f1Score,
+            'Specificity' : specificity,
+            'MCC':MCC,
+            'ROC_AUC_Score':roc_auc_score(actual, predicted),
+            'Balanced Accuracy':balanced_accuracy}
+EMResults1 = EMResults1.append(new_row, ignore_index=True)
+#-----------------------------------------------------------------------------------------------
+
+
+# In[69]:
+
+
+# display the EMResults
+EMResults1.head()
+
+
+# # Gussain Kernal
+
+# In[70]:
+
+
+# Training the SVM algorithm
+
+from sklearn.svm import SVC
+
+ModelSVMGaussian = SVC(kernel='rbf', random_state = 42, class_weight='balanced', probability=True)
+
+# Train the model
+
+ModelSVMGaussian.fit(x_train, y_train)
+
+# Predict the model with test data set
+
+y_pred = ModelSVMGaussian.predict(x_test)
+y_pred_prob = ModelSVMGaussian.predict_proba(x_test)
+
+# Confusion matrix in sklearn
+
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+
+# Print the model name
+    
+print('Model Name: ', "SVM - Gaussian")
+
+# actual values
+
+actual = y_test
+
+# predicted values
+
+predicted = y_pred
+
+# confusion matrix
+
+matrix = confusion_matrix(actual,predicted, labels=[1,0],sample_weight=None, normalize=None)
+print('Confusion matrix : \n', matrix)
+
+# outcome values order in sklearn
+
+tp, fn, fp, tn = confusion_matrix(actual,predicted,labels=[1,0]).reshape(-1)
+print('Outcome values : \n', tp, fn, fp, tn)
+
+# classification report for precision, recall f1-score and accuracy
+
+C_Report = classification_report(actual,predicted,labels=[1,0])
+
+print('Classification report : \n', C_Report)
+
+# calculating the metrics
+
+sensitivity = round(tp/(tp+fn), 3);
+specificity = round(tn/(tn+fp), 3);
+accuracy = round((tp+tn)/(tp+fp+tn+fn), 3);
+balanced_accuracy = round((sensitivity+specificity)/2, 3);
+precision = round(tp/(tp+fp), 3);
+f1Score = round((2*tp/(2*tp + fp + fn)), 3);
+
+# Matthews Correlation Coefficient (MCC). Range of values of MCC lie between -1 to +1. 
+# A model with a score of +1 is a perfect model and -1 is a poor model
+
+from math import sqrt
+
+mx = (tp+fp) * (tp+fn) * (tn+fp) * (tn+fn)
+MCC = round(((tp * tn) - (fp * fn)) / sqrt(mx), 3)
+
+print('Accuracy :', round(accuracy*100, 2),'%')
+print('Precision :', round(precision*100, 2),'%')
+print('Recall :', round(sensitivity*100,2), '%')
+print('F1 Score :', f1Score)
+print('Specificity or True Negative Rate :', round(specificity*100,2), '%'  )
+print('Balanced Accuracy :', round(balanced_accuracy*100, 2),'%')
+print('MCC :', MCC)
+
+# Area under ROC curve 
+
+from sklearn.metrics import roc_curve, roc_auc_score
+
+print('roc_auc_score:', round(roc_auc_score(y_test, y_pred), 3))
+
+# ROC Curve
+
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
+logit_roc_auc = roc_auc_score(y_test, y_pred)
+fpr, tpr, thresholds = roc_curve(y_test,ModelSVMGaussian.predict_proba(x_test)[:,1])
+plt.figure()
+# plt.plot
+plt.plot(fpr, tpr, label= 'Classification Model' % logit_roc_auc)
+plt.plot([0, 1], [0, 1],'r--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic')
+plt.legend(loc="lower right")
+plt.savefig('Log_ROC')
+plt.show() 
+print('-----------------------------------------------------------------------------------------------------')
+#---
+new_row = {'Model Name' : "SVM - Gaussian",
+            'True_Positive' : tp, 
+            'False_Negative' : fn, 
+            'False_Positive' : fp,
+            'True_Negative' : tn,
+            'Accuracy' : accuracy,
+            'Precision' : precision,
+            'Recall' : sensitivity,
+            'F1 Score' : f1Score,
+            'Specificity' : specificity,
+            'MCC':MCC,
+            'ROC_AUC_Score':roc_auc_score(actual, predicted),
+            'Balanced Accuracy':balanced_accuracy}
+EMResults1 = EMResults1.append(new_row, ignore_index=True)
+#---------------------------------------------------------------------------------------------------------------
+
+
+# In[71]:
+
+
+# display the EMResults
+EMResults1.head()
+
+
+# # Sigmoid Kernal
+
+# In[72]:
+
+
+
+# Training the SVM algorithm
+
+from sklearn.svm import SVC
+
+ModelSVMSig = SVC(kernel='sigmoid', random_state = 42, class_weight='balanced', probability=True)
+
+# Train the model
+
+ModelSVMSig.fit(x_train, y_train)
+
+# Predict the model with test data set
+
+y_pred = ModelSVMSig.predict(x_test)
+y_pred_prob = ModelSVMSig.predict_proba(x_test)
+
+# Print the model name
+    
+print('Model Name: ', "SVM - Sigmoid")
+
+# Confusion matrix in sklearn
+
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+
+# actual values
+
+actual = y_test
+
+# predicted values
+
+predicted = y_pred
+
+# confusion matrix
+
+matrix = confusion_matrix(actual,predicted, labels=[1,0],sample_weight=None, normalize=None)
+print('Confusion matrix : \n', matrix)
+
+# outcome values order in sklearn
+
+tp, fn, fp, tn = confusion_matrix(actual,predicted,labels=[1,0]).reshape(-1)
+print('Outcome values : \n', tp, fn, fp, tn)
+
+# classification report for precision, recall f1-score and accuracy
+
+C_Report = classification_report(actual,predicted,labels=[1,0])
+
+print('Classification report : \n', C_Report)
+
+# calculating the metrics
+
+sensitivity = round(tp/(tp+fn), 3);
+specificity = round(tn/(tn+fp), 3);
+accuracy = round((tp+tn)/(tp+fp+tn+fn), 3);
+balanced_accuracy = round((sensitivity+specificity)/2, 3);
+precision = round(tp/(tp+fp), 3);
+f1Score = round((2*tp/(2*tp + fp + fn)), 3);
+
+# Matthews Correlation Coefficient (MCC). Range of values of MCC lie between -1 to +1. 
+# A model with a score of +1 is a perfect model and -1 is a poor model
+
+from math import sqrt
+
+mx = (tp+fp) * (tp+fn) * (tn+fp) * (tn+fn)
+MCC = round(((tp * tn) - (fp * fn)) / sqrt(mx), 3)
+
+print('Accuracy :', round(accuracy*100, 2),'%')
+print('Precision :', round(precision*100, 2),'%')
+print('Recall :', round(sensitivity*100,2), '%')
+print('F1 Score :', f1Score)
+print('Specificity or True Negative Rate :', round(specificity*100,2), '%'  )
+print('Balanced Accuracy :', round(balanced_accuracy*100, 2),'%')
+print('MCC :', MCC)
+
+# Area under ROC curve 
+
+from sklearn.metrics import roc_curve, roc_auc_score
+
+print('roc_auc_score:', round(roc_auc_score(y_test, y_pred), 3))
+
+# ROC Curve
+
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_curve
+logit_roc_auc = roc_auc_score(y_test, y_pred)
+fpr, tpr, thresholds = roc_curve(y_test,ModelSVMSig.predict_proba(x_test)[:,1])
+plt.figure()
+# plt.plot
+plt.plot(fpr, tpr, label= 'Classification Model' % logit_roc_auc)
+plt.plot([0, 1], [0, 1],'r--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic')
+plt.legend(loc="lower right")
+plt.savefig('Log_ROC')
+plt.show() 
+print('-----------------------------------------------------------------------------------------------------')
+#---
+new_row = {'Model Name' : "SVM - Sigmoid",
+            'True_Positive' : tp, 
+            'False_Negative' : fn, 
+            'False_Positive' : fp,
+            'True_Negative' : tn,
+            'Accuracy' : accuracy,
+            'Precision' : precision,
+            'Recall' : sensitivity,
+            'F1 Score' : f1Score,
+            'Specificity' : specificity,
+            'MCC':MCC,
+            'ROC_AUC_Score':roc_auc_score(actual, predicted),
+            'Balanced Accuracy':balanced_accuracy}
+EMResults1 = EMResults1.append(new_row, ignore_index=True)
+#-----------------------------------------------------------------------------------------------------------
+
+
+# In[73]:
+
+
+# display the EMRseults
+EMResults1.head()
+
+
+# # Compare with the Classification algorithm
+
+# In[74]:
+
+
+# load the concrete dataset
+
+EMResults=pd.read_excel(r"EMResultsNew.xlsx",header=0)
+
+
+# display the first 5 records
+EMResults.head(10)
+
+
+# In[76]:
+
+
+# Build the Calssification models and compare the results
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
+
+# Create objects of classification algorithms with default hyper-parameters
+
+ModelLR = LogisticRegression()
+ModelDC = DecisionTreeClassifier()
+ModelRF = RandomForestClassifier()
+ModelET = ExtraTreesClassifier()
+ModelKNN = KNeighborsClassifier(n_neighbors=1)
+ModelGNB = GaussianNB()
+ModelSVMGaussian = SVC(kernel='rbf', random_state = 42, class_weight='balanced', probability=True)
+
+
+
+# Evalution matrix for all the algorithms
+
+#MM = [ModelLR, ModelDC, ModelRF, ModelET, ModelKNN, ModelGNB, ModelSVM]
+MM = [ModelLR, ModelDC, ModelRF, ModelET, ModelKNN, ModelGNB, ModelSVMGaussian]
+for models in MM:
+            
+    # Train the model training dataset
+    
+    models.fit(x_train, y_train)
+    
+    # Prediction the model with test dataset
+    
+    y_pred = models.predict(x_test)
+    y_pred_prob = models.predict_proba(x_test)
+    
+    # Print the model name
+    
+    print('Model Name: ', models)
+    
+    # confusion matrix in sklearn
+
+    from sklearn.metrics import confusion_matrix
+    from sklearn.metrics import classification_report
+
+    # actual values
+
+    actual = y_test
+
+    # predicted values
+
+    predicted = y_pred
+
+    # confusion matrix
+
+    matrix = confusion_matrix(actual,predicted, labels=[1,0],sample_weight=None, normalize=None)
+    print('Confusion matrix : \n', matrix)
+
+    # outcome values order in sklearn
+
+    tp, fn, fp, tn = confusion_matrix(actual,predicted,labels=[1,0]).reshape(-1)
+    print('Outcome values : \n', tp, fn, fp, tn)
+
+    # classification report for precision, recall f1-score and accuracy
+
+    C_Report = classification_report(actual,predicted,labels=[1,0])
+
+    print('Classification report : \n', C_Report)
+
+    # calculating the metrics
+
+    sensitivity = round(tp/(tp+fn), 3);
+    specificity = round(tn/(tn+fp), 3);
+    accuracy = round((tp+tn)/(tp+fp+tn+fn), 3);
+    balanced_accuracy = round((sensitivity+specificity)/2, 3);
+    
+    precision = round(tp/(tp+fp), 3);
+    f1Score = round((2*tp/(2*tp + fp + fn)), 3);
+
+    # Matthews Correlation Coefficient (MCC). Range of values of MCC lie between -1 to +1. 
+    # A model with a score of +1 is a perfect model and -1 is a poor model
+
+    from math import sqrt
+
+    mx = (tp+fp) * (tp+fn) * (tn+fp) * (tn+fn)
+    MCC = round(((tp * tn) - (fp * fn)) / sqrt(mx), 3)
+
+    print('Accuracy :', round(accuracy*100, 2),'%')
+    print('Precision :', round(precision*100, 2),'%')
+    print('Recall :', round(sensitivity*100,2), '%')
+    print('F1 Score :', f1Score)
+    print('Specificity or True Negative Rate :', round(specificity*100,2), '%'  )
+    print('Balanced Accuracy :', round(balanced_accuracy*100, 2),'%')
+    print('MCC :', MCC)
+
+    # Area under ROC curve 
+
+    from sklearn.metrics import roc_curve, roc_auc_score
+
+    print('roc_auc_score:', round(roc_auc_score(actual, predicted), 3))
+    
+    # ROC Curve
+    
+    from sklearn.metrics import roc_auc_score
+    from sklearn.metrics import roc_curve
+    Model_roc_auc = roc_auc_score(actual, predicted)
+    fpr, tpr, thresholds = roc_curve(actual, models.predict_proba(x_test)[:,1])
+    plt.figure()
+    #
+    plt.plot(fpr, tpr, label= 'Classification Model' % Model_roc_auc)
+    plt.plot([0, 1], [0, 1],'r--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic')
+    plt.legend(loc="lower right")
+    plt.savefig('Log_ROC')
+    plt.show()
+    print('-----------------------------------------------------------------------------------------------------')
+    #----------------------------------------------------------------------------------------------------------
+    new_row = {'Model Name' : models,
+               'True_Positive': tp,
+               'False_Negative': fn, 
+               'False_Positive': fp, 
+               'True_Negative': tn,
+               'Accuracy' : accuracy,
+               'Precision' : precision,
+               'Recall' : sensitivity,
+               'F1 Score' : f1Score,
+               'Specificity' : specificity,
+               'MCC':MCC,
+               'ROC_AUC_Score':roc_auc_score(actual, predicted),
+               'Balanced Accuracy':balanced_accuracy}
+    EMResults = EMResults.append(new_row, ignore_index=True)
+    #------------------------------------------------------------------------------
+
+
+# # RESULTS
+
+# In[77]:
+
+
+# display the EMResults
+EMResults.head(10)
+
+
+# # PREDICATION OF ALGORITHM
+
+# In[78]:
+
+
+#predict the values with knn algorithm
+y_predKNN = ModelRF.predict(x_test)
+
+
+# In[79]:
+
+
+#create data frame with actual vs predict values
+# display the final results
+
+Results=pd.DataFrame({'is_preparatory_A':y_test,'is_preparatory_P':y_pred})
+
+# Merge two dataframes on the index of both the dataframe
+
+ResultsFinal=data_bk2.merge(Results,left_index=True,right_index=True)
+
+
+# display 5 records randomly
+
+ResultsFinal.sample(5)
+
+
+# In[ ]:
+
+
+
+
